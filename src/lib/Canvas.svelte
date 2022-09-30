@@ -1,8 +1,7 @@
 <script>
     import Line from "./Line.svelte";
     import Node from "./Node.svelte";
-    import { onMount, onDestroy, setContext } from "svelte";
-    import { fade } from "svelte/transition";
+    import { onMount, onDestroy } from "svelte";
 
     // global variables
     let nodeList = [];
@@ -11,9 +10,6 @@
     let selectedNode = null;
     let selectedLine = null;
     let startNode = null;
-
-    const animationSpeed = 120;
-    setContext("animationSpeed", animationSpeed);
 
     // make nodes and lines reactive on the selected node
     $: if (selectedNode) {
@@ -163,10 +159,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" on:click={handleCanvasClick}>
     <!-- lines -->
     {#each lineList as line (line.id)}
-        <g
-            out:fade={{ duration: animationSpeed }}
-            on:click|stopPropagation={() => handleLineClick(line)}
-        >
+        <g on:click|stopPropagation={() => handleLineClick(line)}>
             <Line {line} isSelected={line === selectedLine} />
         </g>
     {/each}
@@ -187,7 +180,6 @@
     <!-- nodes -->
     {#each nodeList as node (node.id)}
         <g
-            out:fade={{ duration: animationSpeed }}
             on:click|stopPropagation={() => handleNodeClick(node)}
             on:dblclick|stopPropagation={() =>
                 handleNodeDoubleClick(node)}
