@@ -6,7 +6,7 @@
     $: x2 = line.endNode.x;
     $: y1 = line.startNode.y;
     $: y2 = line.endNode.y;
-    $: angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+    $: angle = Math.atan2(y2 - y1, x2 - x1);
 </script>
 
 <!-- outer invisible line to facilitate clicking -->
@@ -19,8 +19,8 @@
 {#if line.type == 1 || line.type == 3}
     <polyline
         style="transform-origin: {x2}px {y2}px;
-               transform: translateX(-{line.endNode.radius}px);
-               rotate: {angle}deg"
+               transform: rotate({angle}rad)
+               translateX(-{line.endNode.radius ?? 0}px)"
         points="{x2},{y2}
         {x2 - 10 * line.width},{y2 + 5 * line.width}
         {x2 - 10 * line.width},{y2 - 5 * line.width}"
@@ -31,8 +31,8 @@
 {#if line.type == 2 || line.type == 3}
     <polyline
         style="transform-origin: {x1}px {y1}px;
-               transform: translateX({line.startNode.radius}px);
-               rotate: {angle}deg"
+        transform: rotate({angle}rad)
+        translateX({line.startNode.radius ?? 0}px)"
         points="{x1},{y1}
         {x1 + 10 * line.width},{y1 + 5 * line.width}
         {x1 + 10 * line.width},{y1 - 5 * line.width}"
