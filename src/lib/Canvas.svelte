@@ -1,25 +1,30 @@
 <script>
     import Line from "./Line.svelte";
     import Node from "./Node.svelte";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount, onDestroy, setContext } from "svelte";
+    import { fade } from "svelte/transition";
 
     let nodeList = [];
     let lineList = [];
     let mouse = { x: 0, y: 0 };
-    let selectedNodeId = null;
-    let selectedLineId = null;
+    let selectedNode = null;
+    let selectedLine = null;
     let startNode = null;
 
-    $: selectedNodeIndex = nodeList.findIndex(
-        (node) => node.id == selectedNodeId
-    );
+    const animationSpeed = 120;
+    setContext("animationSpeed", animationSpeed);
 
-    $: selectedLineIndex = lineList.findIndex(
-        (line) => line.id == selectedLineId
-    );
+    $: if (selectedNode) {
+        nodeList = nodeList;
+        lineList = lineList;
+    }
+
+    $: if (selectedLine) {
+        lineList = lineList;
+    }
 
     function handleCanvasClick() {
-        if (selectedLineId || selectedNodeId || startNode) return;
+        if (selectedLine || selectedNode || startNode) return;
         const newNode = {
             ...mouse,
             id: crypto.randomUUID(),
@@ -42,9 +47,9 @@
     function followMouse(e) {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
-        if (selectedNodeId) {
-            nodeList[selectedNodeIndex].x = mouse.x;
-            nodeList[selectedNodeIndex].y = mouse.y;
+        if (selectedNode) {
+            selectedNode.x = mouse.x;
+            selectedNode.y = mouse.y;
         }
     }
 
@@ -53,58 +58,57 @@
             case "r":
                 if (startNode) {
                     startNode = null;
-                } else if (selectedLineId) {
+                } else if (selectedLine) {
                     lineList = lineList.filter(
-                        (line) => line.id != selectedLineId
+                        (line) => line != selectedLine
                     );
-                    selectedLineId = null;
-                } else if (selectedNodeId) {
+                    selectedLine = null;
+                } else if (selectedNode) {
                     nodeList = nodeList.filter(
-                        (node) => node.id != selectedNodeId
+                        (node) => node != selectedNode
                     );
                     lineList = lineList.filter(
                         (line) =>
-                            line.startNode.id != selectedNodeId &&
-                            line.endNode.id != selectedNodeId
+                            line.startNode != selectedNode &&
+                            line.endNode != selectedNode
                     );
-                    selectedNodeId = null;
+                    selectedNode = null;
                 } else {
-                    selectedNodeId = null;
-                    selectedLineId = null;
+                    selectedNode = null;
+                    selectedLine = null;
                     lineList = [];
                     nodeList = [];
                 }
                 break;
             case "+":
-                if (selectedNodeId) {
-                    nodeList[selectedNodeIndex].radius += 1;
-                } else if (selectedLineId) {
-                    lineList[selectedLineIndex].width += 1;
+                if (selectedNode) {
+                    selectedNode.radius += 1;
+                } else if (selectedLine) {
+                    selectedLine.width += 1;
                 }
                 break;
             case "-":
-                if (selectedNodeId) {
-                    nodeList[selectedNodeIndex].radius = Math.max(
+                if (selectedNode) {
+                    selectedNode.radius = Math.max(
                         1,
-                        nodeList[selectedNodeIndex].radius - 1
+                        selectedNode.radius - 1
                     );
-                } else if (selectedLineId) {
-                    lineList[selectedLineIndex].width = Math.max(
+                    // lineList = lineList;
+                } else if (selectedLine) {
+                    selectedLine.width = Math.max(
                         1,
-                        lineList[selectedLineIndex].width - 1
+                        selectedLine.width - 1
                     );
                 }
                 break;
             case "c":
-                if (selectedNodeId) {
-                    nodeList[selectedNodeIndex].hue =
-                        (nodeList[selectedNodeIndex].hue + 20) % 360;
+                if (selectedNode) {
+                    selectedNode.hue = (selectedNode.hue + 20) % 360;
                 }
                 break;
             case "t":
-                if (selectedLineId) {
-                    lineList[selectedLineIndex].type =
-                        (lineList[selectedLineIndex].type + 1) % 4;
+                if (selectedLine) {
+                    selectedLine.type = (selectedLine.type + 1) % 4;
                 }
                 break;
         }
@@ -112,12 +116,12 @@
 
     function handleNodeClick(node) {
         if (startNode) return;
-        selectedNodeId = node.id === selectedNodeId ? null : node.id;
-        selectedLineId = null;
+        selectedNode = node === selectedNode ? null : node;
+        selectedLine = null;
     }
 
     function handleNodeDoubleClick(node) {
-        if (node.id == selectedNodeId) return;
+        if (node == selectedNode) return;
         if (!startNode) {
             startNode = node;
         } else if (startNode !== node) {
@@ -134,22 +138,22 @@
     }
 
     function handleLineClick(line) {
-        selectedLineId = line.id === selectedLineId ? null : line.id;
-        selectedNodeId = null;
+        selectedLine = line === selectedLine ? null : line;
+        selectedNode = null;
     }
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" on:click={handleCanvasClick}>
-    {#key nodeList}
-        {#each lineList as line (line.id)}
-            <g on:click|stopPropagation={() => handleLineClick(line)}>
-                <Line
-                    {line}
-                    isSelected={line.id === selectedLineId}
-                />
-            </g>
-        {/each}
-    {/key}
+    <!-- lines -->
+    {#each lineList as line (line.id)}
+        <g
+            out:fade={{ duration: animationSpeed }}
+            on:click|stopPropagation={() => handleLineClick(line)}
+        >
+            <Line {line} isSelected={line === selectedLine} />
+        </g>
+    {/each}
+    <!-- created line -->
     {#if startNode}
         <g>
             <Line
@@ -163,16 +167,17 @@
             />
         </g>
     {/if}
-
+    <!-- nodes -->
     {#each nodeList as node (node.id)}
         <g
+            out:fade={{ duration: animationSpeed }}
             on:click|stopPropagation={() => handleNodeClick(node)}
             on:dblclick|stopPropagation={() =>
                 handleNodeDoubleClick(node)}
         >
             <Node
                 {node}
-                isSelected={node.id === selectedNodeId ||
+                isSelected={node === selectedNode ||
                     node == startNode}
             />
         </g>
