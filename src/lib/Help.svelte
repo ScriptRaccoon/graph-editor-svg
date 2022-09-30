@@ -86,5 +86,6 @@
         position: fixed;
         top: 10px;
         right: 15px;
+        user-select: none;
     }
 </style>
