@@ -1,0 +1,37 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button {
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    font-size: inherit;
+    outline: none;
+    cursor: pointer;
+    border: 1px solid #555;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 75ms linear;
+}
+
+button:focus-visible,
+button:hover {
+    color: white;
+    background-color: #555;
+}
+
+.centered {
+    text-align: center;
+}
+
+a {
+    color: inherit;
+}
