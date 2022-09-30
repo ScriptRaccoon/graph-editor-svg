@@ -7,6 +7,7 @@
     const animationSpeed = getContext("animationSpeed");
 </script>
 
+<!-- filled circle for the node -->
 <circle
     transition:scale={{ duration: animationSpeed, easing: quadOut }}
     cx={node.x}
@@ -16,6 +17,7 @@
     style="transform-origin: {node.x}px {node.y}px"
 />
 
+<!-- outer circle indicating selection -->
 {#if isSelected}
     <circle
         cx={node.x}
