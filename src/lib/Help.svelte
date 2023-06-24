@@ -19,7 +19,7 @@
         <p>
             Create lines by double-clicking nodes. The first
             double-clicked node is the start, the second one is the
-            end of the line. Select or delect a line by clicking on
+            end of the line. Select or delete a line by clicking on
             it.
         </p>
         <p>
